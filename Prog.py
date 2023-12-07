@@ -1,5 +1,4 @@
-import sqlite3
-import tkinter as tk
+import Back as sql
 import Interfaz as iz
 
 iz.MenuPrincipal()
