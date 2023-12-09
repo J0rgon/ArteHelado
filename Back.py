@@ -22,24 +22,44 @@ try:
 except sql.OperationalError:
     print('Ya existen las tablas del db')
 
-def Fin():
+cursor.close()
+conexion.close()
+
+def Conectar():
+    global conexion
+    global cursor
+    conexion = sql.connect('Helados.db')
+    cursor = conexion.cursor()
+
+def Cerrar():
+    global conexion
     conexion.close()
 
 def RegistrarVenta(cantidad, helado, volumenH):
-    Elementos = (cantidad, helado, volumenH)
-    cursor.execute('SELECT * FROM Helados WHERE sabor = ? AND volumen = ?', Elementos[1:2])
+    conexion = sql.connect('Helados.db')
+    cursor = conexion.cursor()
+    cursor.execute('SELECT * FROM Helados WHERE sabor = ? AND volumen = ?', (helado, volumenH))
     actual = cursor.fetchone()
     if actual[2] < cantidad:
+        Cerrar()
         return
-    cursor.execute("UPDATE Helados SET vendido = vendido + ? WHERE sabor = ? AND volumen = ?", Elementos)
-    cursor.execute("UPDATE Helados SET existencias = existencias - ? WHERE sabor = ? AND volumen = ?", Elementos)
+    cursor.execute("UPDATE Helados SET vendido = vendido + ? WHERE sabor = ? AND volumen = ?", (cantidad, helado, volumenH))
+    cursor.execute("UPDATE Helados SET existencias = existencias - ? WHERE sabor = ? AND volumen = ?", (cantidad, helado, volumenH))
     conexion.commit()
+    cursor.close()
+    conexion.close()
     return
 
 def AgregarExistencias(cantidad, helado, volumenH):
-    Elementos = (cantidad, helado, volumenH)
-    cursor.execute("UPDATE Helados SET existencias = existencias + ? WHERE sabor = ? AND volumen = ?", Elementos)
+    conexion = sql.connect('Helados.db')
+    cursor = conexion.cursor()
+    print('Se llega a la función agregar')
+    cursor.execute("UPDATE Helados SET existencias = existencias + ? WHERE sabor = ? AND volumen = ?", (cantidad, helado, volumenH))
     conexion.commit()
+    cursor.close()
+    conexion.close()
+    print('Se cierra todo')
+    
 
 
 
