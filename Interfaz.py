@@ -5,7 +5,7 @@ ventana = tk.Tk()
 SaborActual = ''
 volumenActual = ''
 cantidadActual = 0
-venta = 0
+venta = None
 BotonAgregarIMG = tk.PhotoImage(file="imagenes/botonAgregar.png")
 BotonEliminarIMG = tk.PhotoImage(file="imagenes/botonEliminar.png")
 BotonVisualizarIMG = tk.PhotoImage(file="imagenes/botonVisualizar.png")
@@ -33,6 +33,12 @@ Buscar = tk.Entry(ImagenFondo, font=("Verdana", 20))
 Cantidad = tk.Entry(ImagenFondo, font=("Verdana", 20))
 ListaMovil = tk.Listbox(ImagenFondo, font=("Verdana", 20))
 
+Barra = tk.Scrollbar(ImagenFondo, orient=tk.VERTICAL)
+
+ListaStock = tk.Canvas(ImagenFondo, bg='#69CBFF', yscrollcommand=Barra.set, height=2025)
+
+Barra.config(command=ListaStock.yview)
+
 def OcultarTodo():
     for widget in ImagenFondo.winfo_children():
         widget.place_forget()
@@ -52,7 +58,7 @@ def RetornarNombre():
     print(SaborActual)
       
 def RetornarCant():
-#    try:
+    try:
         global cantidadActual
         global SaborActual
         global volumenActual
@@ -65,10 +71,9 @@ def RetornarCant():
         else:
             print('Estoy dentro del else')
             sql.AgregarExistencias(cantidadActual, SaborActual, volumenActual)
-        print('Estoy fuera del condicional')
-        
-#    except:
-#        return
+        print('Estoy fuera del condicional')   
+    except:
+        return
 
 BotonCantidad = tk.Button(ImagenFondo, image=Check, command=lambda: RetornarCant())
 
@@ -113,7 +118,26 @@ def Desplegable():
 
 def VerProductos():
     OcultarTodo()
-    Desplegable()
+    Barra.place(relheight=0.95, relwidth=0.02, relx=0.98, rely=0)
+    Barra.lift()
+    ListaStock.place(relheight=1, relwidth=1)
+    Todos = sql.TodosHelados()
+    desplazamiento = 0
+    print(Todos)
+    for i, helado in enumerate(Todos):
+            Nombre = tk.Label(ListaStock, text=Todos[i][0], font=("Verdana", 20))
+            Vol = tk.Label(ListaStock, text=Todos[i][1], font=("Verdana", 20))
+            Stock = tk.Label(ListaStock, text=str(Todos[i][2]), font=("Verdana", 20))
+            Ventas = tk.Label(ListaStock, text=str(Todos[i][3]), font=("Verdana", 20))
+            Costo = tk.Label(ListaStock, text=str(Todos[i][4]), font=("Verdana", 20))
+            Precio = tk.Label(ListaStock, text=str(Todos[i][5]), font=("Verdana", 20))
+            Nombre.place(height=75, relwidth=0.1, relx=0, y=0+desplazamiento)
+            Vol.place(height=75, relwidth=0.1, relx=0.1, y=0+desplazamiento)
+            Stock.place(height=75, relwidth=0.1, relx=0.2, y=0+desplazamiento)
+            Ventas.place(height=75, relwidth=0.1, relx=0.3, y=0+desplazamiento)
+            Costo.place(height=75, relwidth=0.1, relx=0.4, y=0+desplazamiento)
+            Precio.place(height=75, relwidth=0.1, relx=0.5, y=0+desplazamiento)
+            desplazamiento += 75
 
 def IngresarVentas():
     global venta 
@@ -125,16 +149,17 @@ def IngresarVentas():
 def AgregarExistencias():
     global venta 
     venta = False
+    print('bool venta -> previo ocultar' + str(venta))
     OcultarTodo()
     Desplegable()
 
 
 BotonAgregar = tk.Button(ImagenFondo)
-BotonAgregar.config(text='Agregar existencias', font=("Verdana", 20), command=lambda: IngresarVentas())
+BotonAgregar.config(text='Agregar existencias', font=("Verdana", 20), command=lambda: AgregarExistencias())
 BotonEliminar = tk.Button(ImagenFondo)
-BotonEliminar.config(text='Ingresar venta', font=("Verdana", 20), command=lambda: VerProductos())
+BotonEliminar.config(text='Ingresar venta', font=("Verdana", 20), command=lambda: IngresarVentas())
 BotonVisualizar = tk.Button(ImagenFondo)
-BotonVisualizar.config(text='Ver existencias', font=("Verdana", 20))
+BotonVisualizar.config(text='Ver existencias', font=("Verdana", 20), command=lambda: VerProductos())
 BotonReporte = tk.Button(ImagenFondo)
 BotonReporte.config(text='Generar reporte', font=("Verdana", 20))
 BotonRegistro = tk.Button(ImagenFondo)

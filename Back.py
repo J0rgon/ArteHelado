@@ -3,6 +3,8 @@ import sqlite3 as sql
 conexion = sql.connect('Helados.db')
 volumenes = ('1/2 L', 'L', 'Gal')
 sabores = ("Coco", "Zapote", "Galleta", "Tamarindo", "Mora", "Leche", "Caramelo", "Nance", "Tres leches")
+cantSabores = len(sabores)
+print(cantSabores)
 datosIniciales = []
 for sabor in sabores:
     datoMedio = (sabor, volumenes[0], 0, 0, 0, 0)
@@ -18,7 +20,7 @@ try:
     cursor.executemany("INSERT INTO Helados VALUES (?, ?, ?, ?, ?, ?)", datosIniciales)
     conexion.commit()    
 
-    cursor.execute("CREATE TABLE Registros (nombre VARCHAR(100), vendidos INTEGER, fecha DATE)")
+    cursor.execute("CREATE TABLE Registros (id INTEGER PRIMARY KEY AUTOINCREMENT, nombre VARCHAR(100), vendidos INTEGER, fecha DATE)")
 except sql.OperationalError:
     print('Ya existen las tablas del db')
 
@@ -60,6 +62,20 @@ def AgregarExistencias(cantidad, helado, volumenH):
     conexion.close()
     print('Se cierra todo')
     
+def GenerarRegistro():
+    return
+
+def TodosHelados():
+    conexion = sql.connect('Helados.db')
+    cursor = conexion.cursor()
+    cursor.execute("SELECT * FROM Helados")
+    Todos = cursor.fetchall()
+    cursor.close()
+    conexion.close()
+    return Todos
+
+    cursor.close()
+    conexion.close()
 
 
 
