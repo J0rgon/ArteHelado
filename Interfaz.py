@@ -1,10 +1,12 @@
 import tkinter as tk
 import Back as sql
+from tkinter import messagebox as mb
 
 ventana = tk.Tk()
 SaborActual = ''
 volumenActual = ''
 cantidadActual = 0
+cantidadActualVenta = 0
 venta = None
 BotonAgregarIMG = tk.PhotoImage(file="imagenes/botonAgregar.png")
 BotonEliminarIMG = tk.PhotoImage(file="imagenes/botonEliminar.png")
@@ -31,11 +33,12 @@ ImagenFondo.config(image=FondoIMG)
 ImagenFondo.place_configure(relheight=1, relwidth=1)
 Buscar = tk.Entry(ImagenFondo, font=("Verdana", 20))
 Cantidad = tk.Entry(ImagenFondo, font=("Verdana", 20))
+Cantidad2 = tk.Entry(ImagenFondo, font=("Verdana", 20))
 ListaMovil = tk.Listbox(ImagenFondo, font=("Verdana", 20))
 
 Barra = tk.Scrollbar(ImagenFondo, orient=tk.VERTICAL)
 
-ListaStock = tk.Canvas(ImagenFondo, bg='#69CBFF', yscrollcommand=Barra.set, height=2025)
+ListaStock = tk.Canvas(ImagenFondo, bg='#69CBFF', yscrollcommand=Barra.set)
 
 Barra.config(command=ListaStock.yview)
 
@@ -67,15 +70,38 @@ def RetornarCant():
         print(cantidadActual)
         print('bool venta -> ' + str(venta))
         if venta:
-            sql.RegistrarVenta(cantidadActual, SaborActual, volumenActual)
+            posible = sql.RegistrarVenta(cantidadActual, SaborActual, volumenActual)
+            if not posible:
+                print(mb.showwarning('Alerta', 'No hay existencias suficientes'))
         else:
             print('Estoy dentro del else')
             sql.AgregarExistencias(cantidadActual, SaborActual, volumenActual)
         print('Estoy fuera del condicional')   
     except:
+        
         return
+    
+def RetornarCantP():
+    try:
+         global cantidadActual
+         cantidadActual = float(Cantidad.get())
+         sql.ModCosto(cantidadActual, SaborActual, volumenActual)
+    except:
+         print(mb.showwarning('Alerta', 'Cantidad ingresada no válida'))
+         return
+    
+def RetornarCantV():
+    try:
+         global cantidadActual2
+         cantidadActual2 = float(Cantidad2.get())
+         sql.ModPrecio(cantidadActual2, SaborActual, volumenActual)
+    except:
+         print(mb.showwarning('Alerta', 'Cantidad ingresada no válida'))
+         return
 
 BotonCantidad = tk.Button(ImagenFondo, image=Check, command=lambda: RetornarCant())
+BotonCantidadP = tk.Button(ImagenFondo, image=Check, command=lambda: RetornarCantP())
+BotonCantidadV = tk.Button(ImagenFondo, image=Check, command=lambda: RetornarCantV())
 
 def IngresarCantidad():
     OcultarTodo()
@@ -83,10 +109,23 @@ def IngresarCantidad():
     Mensaje = tk.Label(ImagenFondo, text=f'{SaborActual} {volumenActual}', font=("Verdana", 20))
     Mensaje.place(relheight=0.1, relwidth=0.2, relx=0.4, rely=0.3)
     Cantidad.place(relheight=0.1, relwidth=0.1, relx=0.4, rely=0.4)
-    Buscar.bind('<KeyRelease>', Scankey)
     BotonCantidad.place(relheight=0.1, relwidth=0.1, relx=0.5, rely=0.4)
 
+def IngresarCantidadPV():
+    OcultarTodo()
+    Mensaje = tk.Label(ImagenFondo, text=f'{SaborActual} {volumenActual}', font=("Verdana", 20))
+    Pago = tk.Label(ImagenFondo, text='Costo', font=("Verdana", 20))
+    Venta = tk.Label(ImagenFondo, text='Venta', font=("Verdana", 20))
+    Mensaje.place(relheight=0.1, relwidth=0.2, relx=0.4, rely=0.3)
+    Pago.place(relheight=0.1, relwidth=0.2, relx=0.2, rely=0.4)
+    Venta.place(relheight=0.1, relwidth=0.2, relx=0.2, rely=0.5)
+    Cantidad.place(relheight=0.1, relwidth=0.1, relx=0.4, rely=0.4)
+    Cantidad2.place(relheight=0.1, relwidth=0.1, relx=0.4, rely=0.5)
+    BotonCantidadP.place(relheight=0.1, relwidth=0.1, relx=0.5, rely=0.4)
+    BotonCantidadV.place(relheight=0.1, relwidth=0.1, relx=0.5, rely=0.5)
+
 BotonBuscar = tk.Button(ImagenFondo, image=Lupa, command=lambda: [RetornarNombre(), IngresarCantidad()])
+BotonBuscar2 = tk.Button(ImagenFondo, image=Lupa, command=lambda: [RetornarNombre(), IngresarCantidadPV()])
 
 
 def Scankey(event):
@@ -116,28 +155,69 @@ def Desplegable():
     ListaMovil.place(relheight=0.7, relwidth=0.3, relx=0.25, rely=0.25)
     Update(sql.sabores)
 
+def DesplegablePV():
+    BotonMedioL.place(relheight=0.1, relwidth=0.1, relx=0.6, rely=0.1)
+    BotonL.place(relheight=0.1, relwidth=0.1, relx=0.6, rely=0.3)
+    BotonGal.place(relheight=0.1, relwidth=0.1, relx=0.6, rely=0.5)
+    BotonBuscar2.place(relheight=0.2, relwidth=0.05, relx=0.5, rely=0)
+    Buscar.place(relheight=0.2, relwidth=0.25, relx=0.25, rely=0)
+    Buscar.bind('<KeyRelease>', Scankey)
+    ListaMovil.place(relheight=0.7, relwidth=0.3, relx=0.25, rely=0.25)
+    Update(sql.sabores)
+
+Barra = tk.Scrollbar(ImagenFondo, orient=tk.VERTICAL)
+ListaStock = tk.Canvas(ImagenFondo, bg='#69CBFF', yscrollcommand=Barra.set, scrollregion=(0,0,3000,3000))
+
+def on_canvas_configure(event):
+    ListaStock.configure(scrollregion=ListaStock.bbox("all"))
+
 def VerProductos():
+    global Barra
+    global ListaStock
     OcultarTodo()
+    Barra.config(command=ListaStock.yview)
     Barra.place(relheight=0.95, relwidth=0.02, relx=0.98, rely=0)
     Barra.lift()
-    ListaStock.place(relheight=1, relwidth=1)
+
+    frame_inside_canvas = tk.Frame(ListaStock)
+    ListaStock.create_window((0, 0), window=frame_inside_canvas, anchor=tk.NW)
+
+    nombreH = tk.Label(frame_inside_canvas, text=('Sabor').ljust(20), font=("Verdana", 20), width=20, bg='#1cba00')
+    volH = tk.Label(frame_inside_canvas, text=('Vol').ljust(5), font=("Verdana", 20), width=5, bg='#1cba00')
+    existenciasH = tk.Label(frame_inside_canvas, text=('Stock').ljust(5), font=("Verdana", 20), width=5, bg='#1cba00')
+    vendidoH = tk.Label(frame_inside_canvas, text=('Vend.').ljust(6), font=("Verdana", 20), width=6, bg='#1cba00')
+    costoH = tk.Label(frame_inside_canvas, text=('Costo').ljust(6), font=("Verdana", 20), width=6, bg='#1cba00')
+    precioH = tk.Label(frame_inside_canvas, text=('Venta').ljust(6), font=("Verdana", 20), width=6, bg='#1cba00')
+
+    nombreH.grid(column=0, row=0)
+    volH.grid(column=1, row=0)
+    existenciasH.grid(column=2, row=0)
+    vendidoH.grid(column=3, row=0)
+    costoH.grid(column=4, row=0)
+    precioH.grid(column=5, row=0)
+
     Todos = sql.TodosHelados()
-    desplazamiento = 0
-    print(Todos)
+    fila = 1
     for i, helado in enumerate(Todos):
-            Nombre = tk.Label(ListaStock, text=Todos[i][0], font=("Verdana", 20))
-            Vol = tk.Label(ListaStock, text=Todos[i][1], font=("Verdana", 20))
-            Stock = tk.Label(ListaStock, text=str(Todos[i][2]), font=("Verdana", 20))
-            Ventas = tk.Label(ListaStock, text=str(Todos[i][3]), font=("Verdana", 20))
-            Costo = tk.Label(ListaStock, text=str(Todos[i][4]), font=("Verdana", 20))
-            Precio = tk.Label(ListaStock, text=str(Todos[i][5]), font=("Verdana", 20))
-            Nombre.place(height=75, relwidth=0.1, relx=0, y=0+desplazamiento)
-            Vol.place(height=75, relwidth=0.1, relx=0.1, y=0+desplazamiento)
-            Stock.place(height=75, relwidth=0.1, relx=0.2, y=0+desplazamiento)
-            Ventas.place(height=75, relwidth=0.1, relx=0.3, y=0+desplazamiento)
-            Costo.place(height=75, relwidth=0.1, relx=0.4, y=0+desplazamiento)
-            Precio.place(height=75, relwidth=0.1, relx=0.5, y=0+desplazamiento)
-            desplazamiento += 75
+        nombre = tk.Label(frame_inside_canvas, text=str(helado[0]).ljust(20), font=("Verdana", 20), width=20, bd=2)
+        vol = tk.Label(frame_inside_canvas, text=str(Todos[i][1]).ljust(5), font=("Verdana", 20), width=5, bd=2)
+        existencias = tk.Label(frame_inside_canvas, text=str(Todos[i][2]).ljust(5), font=("Verdana", 20), width=5, bd=2)
+        vendido = tk.Label(frame_inside_canvas, text=str(Todos[i][3]).ljust(6), font=("Verdana", 20), width=6, bd=2)
+        costo = tk.Label(frame_inside_canvas, text=str(Todos[i][4]).ljust(6), font=("Verdana", 20), width=6, bd=2)
+        precio = tk.Label(frame_inside_canvas, text=str(Todos[i][5]).ljust(6), font=("Verdana", 20), width=6, bd=2)
+
+        nombre.grid(column=0, row=fila)
+        vol.grid(column=1, row=fila)
+        existencias.grid(column=2, row=fila)
+        vendido.grid(column=3, row=fila)
+        costo.grid(column=4, row=fila)
+        precio.grid(column=5, row=fila)
+
+        fila += 1
+
+    frame_inside_canvas.bind("<Configure>", on_canvas_configure)
+    ListaStock.pack(side=tk.LEFT, fill=tk.BOTH, expand=True)
+
 
 def IngresarVentas():
     global venta 
@@ -153,6 +233,14 @@ def AgregarExistencias():
     OcultarTodo()
     Desplegable()
 
+def ModificarPV():
+    OcultarTodo()
+    DesplegablePV()
+
+def ConfirmarRegistro():
+     resultado = mb.askokcancel(title='Confirmar crear registro', message='¿Utilizar datos actuales y reiniciarlos?')
+     if resultado:
+          sql.GenerarRegistro()
 
 BotonAgregar = tk.Button(ImagenFondo)
 BotonAgregar.config(text='Agregar existencias', font=("Verdana", 20), command=lambda: AgregarExistencias())
@@ -161,12 +249,16 @@ BotonEliminar.config(text='Ingresar venta', font=("Verdana", 20), command=lambda
 BotonVisualizar = tk.Button(ImagenFondo)
 BotonVisualizar.config(text='Ver existencias', font=("Verdana", 20), command=lambda: VerProductos())
 BotonReporte = tk.Button(ImagenFondo)
-BotonReporte.config(text='Generar reporte', font=("Verdana", 20))
+BotonReporte.config(text='Generar reporte', font=("Verdana", 20), command=lambda: ConfirmarRegistro())
 BotonRegistro = tk.Button(ImagenFondo)
-BotonRegistro.config(text='Ver reportes', font=("Verdana", 20))
+BotonRegistro.config(text='Modif. Pago/Venta', font=("Verdana", 20), command=lambda: ModificarPV())
 
 def MenuPrincipal():
     OcultarTodo()
+    global ListaStock
+    global Barra
+    ListaStock.pack_forget()
+    Barra.place_forget()
     BotonAgregar.place(relheight=0.2, relwidth=0.3, relx=0.35, rely=0)
     BotonEliminar.place(relheight=0.2, relwidth=0.3, relx=0.35, rely=0.2)
     BotonVisualizar.place(relheight=0.2, relwidth=0.3, relx=0.35, rely=0.4)
