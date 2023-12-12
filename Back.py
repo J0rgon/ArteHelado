@@ -3,12 +3,13 @@ import datetime as dt
 import os
 
 conexion = sql.connect('Helados.db')
-volumenes = ['1/2 L', 'L', 'Gal']
-sabores = ["Coco", "Zapote", "Galleta", "Tamarindo", "Mora", "Leche", "Caramelo", "Nance", "Tres leches"]
-cantSabores = len(sabores)
+volumenes = []
+sabores = []
 cursor = conexion.cursor()
 try:
     cursor.execute("CREATE TABLE Helados (sabor VARCHAR(20), volumen VARCHAR(10), existencias INTEGER, vendido INTEGER, costo DECIMAL(10, 5), venta DECIMAL(10, 5))")
+    volumenes = ['1/2 L', 'L', 'Gal']
+    sabores = ["Coco", "Zapote", "Galleta", "Tamarindo", "Mora", "Leche", "Caramelo", "Nance", "Tres leches"]
     datosIniciales = []
     for sabor in sabores:
         for vol in volumenes:
@@ -20,6 +21,13 @@ try:
     os.mkdir('.\Registro')
 except sql.OperationalError:
     print('Ya existen las tablas del db')
+    cursor.execute("SELECT * FROM Helados")
+    helados = cursor.fetchall()
+    for helado in helados:
+        if helado[0] not in sabores:
+            sabores.append(helado[0])
+        if helado[1] not in volumenes:
+            volumenes.append(helado[1])
 cursor.close()
 conexion.close()
 
@@ -69,7 +77,7 @@ def GenerarRegistro():
     totalCosto = 0
     totalVenta = 0
     totalVendidos = 0
-    cursor.execute("SELECT * FROM Helados GROUP BY sabor")
+    cursor.execute("SELECT * FROM Helados")
     Vendidos = []
     Todos = cursor.fetchall()
     for i, IC in enumerate(Todos):
@@ -105,7 +113,7 @@ def GenerarRegistro():
 def TodosHelados():
     conexion = sql.connect('Helados.db')
     cursor = conexion.cursor()
-    cursor.execute("SELECT * FROM Helados")
+    cursor.execute("SELECT * FROM Helados ORDER BY sabor")
     Todos = cursor.fetchall()
     cursor.close()
     conexion.close()
@@ -144,6 +152,17 @@ def CrearSabor(nuevoSabor):
     conexion.close()
     return
 
+def EliminarSabor(Del):
+    global sabores
+    conexion = sql.connect('Helados.db')
+    cursor = conexion.cursor()
+    sabores.remove(Del)
+    cursor.execute('DELETE FROM Helados WHERE sabor = ?', (Del,))
+    conexion.commit()
+    cursor.close()
+    conexion.close()
+    return
+
 def CrearVol(nuevoVol):
     global volumenes
     conexion = sql.connect('Helados.db')
@@ -154,6 +173,17 @@ def CrearVol(nuevoVol):
         temp = (sabor, nuevoVol, 0, 0, 0, 0)
         nuevasFilas.append(temp)
     cursor.executemany('INSERT INTO Helados VALUES (?, ?, ?, ?, ?, ?)', nuevasFilas)
+    conexion.commit()
+    cursor.close()
+    conexion.close()
+    return
+
+def EliminarVol(Del):
+    global volumenes
+    conexion = sql.connect('Helados.db')
+    cursor = conexion.cursor()
+    volumenes.remove(Del)
+    cursor.execute('DELETE FROM Helados WHERE volumen = ?', (Del,))
     conexion.commit()
     cursor.close()
     conexion.close()
