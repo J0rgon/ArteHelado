@@ -97,7 +97,7 @@ def GenerarRegistro():
     nuevoRegistro.write("|Sabor               |Vol  |Cant.|Pago  |Venta |\n")
     nuevoRegistro.write("|--------------------|-----|-----|------|------|\n")
     for sorbete in Vendidos:
-        nuevoRegistro.write(f"|{sorbete[0].ljust(20)}|{sorbete[1].ljust(5)}|{str(sorbete[3]).ljust(5)}|{str(round(sorbete[3]*sorbete[4], 2)).ljust(6)}|{str(round(sorbete[3]*sorbete[5], 2)).ljust(6)}|\n")
+        nuevoRegistro.write(f"|{sorbete[0].ljust(20)}|{sorbete[1].ljust(10)}|{str(sorbete[3]).ljust(5)}|{str(round(sorbete[3]*sorbete[4], 2)).ljust(6)}|{str(round(sorbete[3]*sorbete[5], 2)).ljust(6)}|\n")
         totalVendidos += sorbete[3]
         totalCosto += sorbete[3]*sorbete[4]
         totalVenta += sorbete[3]*sorbete[5]
