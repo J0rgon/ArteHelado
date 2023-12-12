@@ -3,29 +3,23 @@ import datetime as dt
 import os
 
 conexion = sql.connect('Helados.db')
-volumenes = ('1/2 L', 'L', 'Gal')
-sabores = ("Coco", "Zapote", "Galleta", "Tamarindo", "Mora", "Leche", "Caramelo", "Nance", "Tres leches")
+volumenes = ['1/2 L', 'L', 'Gal']
+sabores = ["Coco", "Zapote", "Galleta", "Tamarindo", "Mora", "Leche", "Caramelo", "Nance", "Tres leches"]
 cantSabores = len(sabores)
-
-datosIniciales = []
-for sabor in sabores:
-    datoMedio = (sabor, volumenes[0], 0, 0, 0, 0)
-    datoLitro = (sabor, volumenes[1], 0, 0, 0, 0)
-    datoGal = (sabor, volumenes[2], 0, 0, 0, 0)
-    datosIniciales.append(datoMedio)
-    datosIniciales.append(datoLitro)
-    datosIniciales.append(datoGal)
 cursor = conexion.cursor()
-
 try:
     cursor.execute("CREATE TABLE Helados (sabor VARCHAR(20), volumen VARCHAR(10), existencias INTEGER, vendido INTEGER, costo DECIMAL(10, 5), venta DECIMAL(10, 5))")
+    datosIniciales = []
+    for sabor in sabores:
+        for vol in volumenes:
+            temp = (sabor, vol, 0, 0, 0, 0)
+            datosIniciales.append(temp)
     cursor.executemany("INSERT INTO Helados VALUES (?, ?, ?, ?, ?, ?)", datosIniciales)
     conexion.commit()
     cursor.execute("CREATE TABLE Registros (id INTEGER PRIMARY KEY AUTOINCREMENT, fecha DATE)")
     os.mkdir('.\Registro')
 except sql.OperationalError:
     print('Ya existen las tablas del db')
-
 cursor.close()
 conexion.close()
 
@@ -65,6 +59,7 @@ def AgregarExistencias(cantidad, helado, volumenH):
     conexion.commit()
     cursor.close()
     conexion.close()
+    return
     
     
 def GenerarRegistro():
@@ -74,7 +69,7 @@ def GenerarRegistro():
     totalCosto = 0
     totalVenta = 0
     totalVendidos = 0
-    cursor.execute("SELECT * FROM Helados")
+    cursor.execute("SELECT * FROM Helados GROUP BY sabor")
     Vendidos = []
     Todos = cursor.fetchall()
     for i, IC in enumerate(Todos):
@@ -129,6 +124,36 @@ def ModPrecio(nuevoValor, sabor, volumenH):
     conexion = sql.connect('Helados.db')
     cursor = conexion.cursor()
     cursor.execute("UPDATE Helados SET venta = ? WHERE sabor = ? AND volumen = ?", (nuevoValor, sabor, volumenH))
+    conexion.commit()
+    cursor.close()
+    conexion.close()
+    return
+
+def CrearSabor(nuevoSabor):
+    global sabores
+    conexion = sql.connect('Helados.db')
+    cursor = conexion.cursor()
+    sabores.append(nuevoSabor)
+    nuevasFilas = []
+    for vol in volumenes:
+        temp = (nuevoSabor, vol, 0, 0, 0, 0)
+        nuevasFilas.append(temp)
+    cursor.executemany('INSERT INTO Helados VALUES (?, ?, ?, ?, ?, ?)', nuevasFilas)
+    conexion.commit()
+    cursor.close()
+    conexion.close()
+    return
+
+def CrearVol(nuevoVol):
+    global volumenes
+    conexion = sql.connect('Helados.db')
+    cursor = conexion.cursor()
+    volumenes.append(nuevoVol)
+    nuevasFilas = []
+    for sabor in sabores:
+        temp = (sabor, nuevoVol, 0, 0, 0, 0)
+        nuevasFilas.append(temp)
+    cursor.executemany('INSERT INTO Helados VALUES (?, ?, ?, ?, ?, ?)', nuevasFilas)
     conexion.commit()
     cursor.close()
     conexion.close()

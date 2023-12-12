@@ -32,9 +32,11 @@ ImagenFondo = tk.Label(Fondo)
 ImagenFondo.config(image=FondoIMG)
 ImagenFondo.place_configure(relheight=1, relwidth=1)
 Buscar = tk.Entry(ImagenFondo, font=("Verdana", 20))
+Buscar3 = tk.Entry(ImagenFondo, font=("Verdana", 20))
 Cantidad = tk.Entry(ImagenFondo, font=("Verdana", 20))
 Cantidad2 = tk.Entry(ImagenFondo, font=("Verdana", 20))
 ListaMovil = tk.Listbox(ImagenFondo, font=("Verdana", 20))
+ListaMovil3 = tk.Listbox(ImagenFondo, font=("Verdana", 20))
 
 Barra = tk.Scrollbar(ImagenFondo, orient=tk.VERTICAL)
 
@@ -45,11 +47,6 @@ Barra.config(command=ListaStock.yview)
 def OcultarTodo():
     for widget in ImagenFondo.winfo_children():
         widget.place_forget()
-
-def MedioL(i):
-    global volumenActual
-    volumenActual = sql.volumenes[i]
-    print('Volumen: ' + volumenActual)
 
 BotonMedioL = tk.Button(ImagenFondo, command=lambda: MedioL(0), text=sql.volumenes[0])
 BotonL = tk.Button(ImagenFondo, command=lambda: MedioL(1), text=sql.volumenes[1])
@@ -78,7 +75,7 @@ def RetornarCant():
             sql.AgregarExistencias(cantidadActual, SaborActual, volumenActual)
         print('Estoy fuera del condicional')   
     except:
-        
+        mb.showwarning('Alerta', 'Cantidad ingresada no válida')
         return
     
 def RetornarCantP():
@@ -87,7 +84,7 @@ def RetornarCantP():
          cantidadActual = float(Cantidad.get())
          sql.ModCosto(cantidadActual, SaborActual, volumenActual)
     except:
-         print(mb.showwarning('Alerta', 'Cantidad ingresada no válida'))
+         mb.showwarning('Alerta', 'Cantidad ingresada no válida')
          return
     
 def RetornarCantV():
@@ -96,7 +93,7 @@ def RetornarCantV():
          cantidadActual2 = float(Cantidad2.get())
          sql.ModPrecio(cantidadActual2, SaborActual, volumenActual)
     except:
-         print(mb.showwarning('Alerta', 'Cantidad ingresada no válida'))
+         mb.showwarning('Alerta', 'Cantidad ingresada no válida')
          return
 
 BotonCantidad = tk.Button(ImagenFondo, image=Check, command=lambda: RetornarCant())
@@ -124,8 +121,15 @@ def IngresarCantidadPV():
     BotonCantidadP.place(relheight=0.1, relwidth=0.1, relx=0.5, rely=0.4)
     BotonCantidadV.place(relheight=0.1, relwidth=0.1, relx=0.5, rely=0.5)
 
+def ObtenerVol():
+     global volumenActual
+     volumenProv = Buscar3.get()
+     if volumenProv in sql.volumenes:
+          volumenActual = volumenProv
+
 BotonBuscar = tk.Button(ImagenFondo, image=Lupa, command=lambda: [RetornarNombre(), IngresarCantidad()])
 BotonBuscar2 = tk.Button(ImagenFondo, image=Lupa, command=lambda: [RetornarNombre(), IngresarCantidadPV()])
+BotonBuscar3 = tk.Button(ImagenFondo, image=Lupa, command=lambda: ObtenerVol())
 
 
 def Scankey(event):
@@ -138,32 +142,53 @@ def Scankey(event):
 			if val.lower() in item.lower():
 				data.append(item)				
 	Update(data)
+     
+def ScankeyVol(event):
+	val = event.widget.get()
+	if val == '':
+		data = sql.volumenes
+	else:
+		data = []
+		for item in sql.volumenes:
+			if val.lower() in item.lower():
+				data.append(item)				
+	Update(data)
 
 def Update(data):
 	ListaMovil.delete(0, 'end')
 	# put new data
 	for item in data:
 		ListaMovil.insert('end', item)
+          
+def UpdateVol(data):
+	ListaMovil3.delete(0, 'end')
+	# put new data
+	for item in data:
+		ListaMovil3.insert('end', item)
 		
 def Desplegable():
-    BotonMedioL.place(relheight=0.1, relwidth=0.1, relx=0.6, rely=0.1)
-    BotonL.place(relheight=0.1, relwidth=0.1, relx=0.6, rely=0.3)
-    BotonGal.place(relheight=0.1, relwidth=0.1, relx=0.6, rely=0.5)
+    Buscar3.place(relheight=0.2, relwidth=0.25, relx=0.6, rely=0)
+    BotonBuscar3.place(relheight=0.2, relwidth=0.05, relx=0.85, rely=0)
     BotonBuscar.place(relheight=0.2, relwidth=0.05, relx=0.5, rely=0)
     Buscar.place(relheight=0.2, relwidth=0.25, relx=0.25, rely=0)
     Buscar.bind('<KeyRelease>', Scankey)
+    Buscar3.bind('<KeyRelease>', ScankeyVol)
     ListaMovil.place(relheight=0.7, relwidth=0.3, relx=0.25, rely=0.25)
+    ListaMovil3.place(relheight=0.7, relwidth=0.3, relx=0.6, rely=0.25)
     Update(sql.sabores)
+    UpdateVol(sql.volumenes)
 
 def DesplegablePV():
-    BotonMedioL.place(relheight=0.1, relwidth=0.1, relx=0.6, rely=0.1)
-    BotonL.place(relheight=0.1, relwidth=0.1, relx=0.6, rely=0.3)
-    BotonGal.place(relheight=0.1, relwidth=0.1, relx=0.6, rely=0.5)
+    Buscar3.place(relheight=0.2, relwidth=0.25, relx=0.6, rely=0)
+    BotonBuscar3.place(relheight=0.2, relwidth=0.05, relx=0.85, rely=0)
     BotonBuscar2.place(relheight=0.2, relwidth=0.05, relx=0.5, rely=0)
     Buscar.place(relheight=0.2, relwidth=0.25, relx=0.25, rely=0)
     Buscar.bind('<KeyRelease>', Scankey)
+    Buscar3.bind('<KeyRelease>', ScankeyVol)
     ListaMovil.place(relheight=0.7, relwidth=0.3, relx=0.25, rely=0.25)
+    ListaMovil3.place(relheight=0.7, relwidth=0.3, relx=0.6, rely=0.25)
     Update(sql.sabores)
+    UpdateVol(sql.volumenes)
 
 Barra = tk.Scrollbar(ImagenFondo, orient=tk.VERTICAL)
 ListaStock = tk.Canvas(ImagenFondo, bg='#69CBFF', yscrollcommand=Barra.set, scrollregion=(0,0,3000,3000))
@@ -241,6 +266,15 @@ def ConfirmarRegistro():
      resultado = mb.askokcancel(title='Confirmar crear registro', message='¿Utilizar datos actuales y reiniciarlos?')
      if resultado:
           sql.GenerarRegistro()
+    
+def EliminarSabor():
+     return
+
+def CrearSabor():
+     OcultarTodo()
+     Eliminar = tk.Button(ImagenFondo, text='Eliminar Sabor', font=("Verdana", 20), command=lambda: EliminarSabor())
+     IngresarNombre = tk.Entry(ImagenFondo, font=("Verdana", 20))
+     Eliminar.place(relheight=0.2, relwidth=0.2, relx=0, rely=0.8)
 
 BotonAgregar = tk.Button(ImagenFondo)
 BotonAgregar.config(text='Agregar existencias', font=("Verdana", 20), command=lambda: AgregarExistencias())
@@ -252,6 +286,8 @@ BotonReporte = tk.Button(ImagenFondo)
 BotonReporte.config(text='Generar reporte', font=("Verdana", 20), command=lambda: ConfirmarRegistro())
 BotonRegistro = tk.Button(ImagenFondo)
 BotonRegistro.config(text='Modif. Pago/Venta', font=("Verdana", 20), command=lambda: ModificarPV())
+BotonSalir = tk.Button(ImagenFondo, text='Salir', font=("Verdana", 20), command=lambda: ventana.destroy())
+BotonNuevoSabor = tk.Button(ImagenFondo, text='Agregar sabor', font=("Verdana", 20), command=)
 
 def MenuPrincipal():
     OcultarTodo()
@@ -264,6 +300,7 @@ def MenuPrincipal():
     BotonVisualizar.place(relheight=0.2, relwidth=0.3, relx=0.35, rely=0.4)
     BotonReporte.place(relheight=0.2, relwidth=0.3, relx=0.35, rely=0.6)
     BotonRegistro.place(relheight=0.2, relwidth=0.3, relx=0.35, rely=0.8)
+    BotonSalir.place(relheight=0.1, relwidth=0.1, relx=0, rely=0.9)
 	
 Regresar = tk.Button(Fondo, image=Flecha, command=lambda: MenuPrincipal())
 Regresar.place(relheight=0.05, relwidth=0.05, relx=0.95, rely=0.95)
